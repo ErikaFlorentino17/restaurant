@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="Estore.css">
+    <title>Restaurant Menu</title>
+</head>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+header{
+  text-align: center;
+  padding: 1em;
+}
+
+#wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#products {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.product {
+  border: 5px solid #000000;
+  border-radius: 2px;
+  padding: 10px;
+  margin: 20px;
+  width: 200px;
+  display: inline-block;
+  text-align: center;
+}
+
+.product img {
+  width: 100px;
+  margin-bottom: 10px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+#cart-total {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+h2 {
+  color: black;
+}
+
+span {
+  color: maroon;
+}
+
+button {
+  background-color: maroon;
+  color: white;
+  text-align: center;
+  margin-bottom: 20px;
+}
+ button:hover {
+  background-color: black;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+}
+
+#cart {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px;
+}
+</style>
+
+<body>
+    <header>
+        <h1>Erika RestoBar</h1>
+        <!-- Container for the category buttons -->
+        <div id="category-buttons">
+            <button class="category-button" data-category="category maindish">MAINDISH</button>
+            <button class="category-button" data-category="category vegetables">VEGETABLES</button>
+            <button class="category-button" data-category="category dessert">DESSERT</button>
+            <button class="category-button" data-category="category drinks">DRINKS</button>
+            <button class="category-button" data-category="category addons">ADDONS</button>
+        </div>
+    </header>
+
+    <div id="wrapper">
+        <div id="products"></div>
+        <div id="cart">
+            <h2>Bills</h2>
+            <div id="cart-items"></div>
+            <div id="cart-total">Total: ₱0.00</div>
+            <button id="checkout-btn">Checkout</button>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { id: 1, name: 'STEAK & FRIES', price: 750, stock: 100, category: 'category maindish', image: 'img1.jpg' },
+            { id: 2, name: 'BURGERS', price: 100, stock: 100, category: 'category maindish', image: 'img2.jpg' },
+            { id: 3, name: 'GRILLED CHICKEN', price: 450, stock: 100, category: 'category maindish', image: 'img3.jpg' },
+            { id: 4, name: 'PIZZA', price: 500, stock: 100, category: 'category maindish', image: 'img4.jpg' },
+            { id: 5, name: 'SEAFOOD PLATTERS', price: 200, stock: 100, category: 'category maindish', image: 'img5.jpg' },
+            { id: 6, name: 'STUFFED PEPPERS', price: 200, stock: 100, category: 'category vegetables', image: 'img6.jpg' },
+            { id: 7, name: 'VEGGIE BURGER', price: 100, stock: 100, category: 'category vegetables', image: 'img7.jpg' },
+            { id: 8, name: 'EGGPLANT PARMESAN', price: 300, stock: 100, category: 'category vegetables', image: 'img8.jpg' },
+            { id: 9, name: 'CHEESECAKE', price: 100, stock: 100, category: 'category dessert', image: 'img9.jpg' },
+            { id: 10, name: 'APPLE PIE', price: 75, stock: 100, category: 'category dessert', image: 'img10.jpg' },
+            { id: 11, name: 'CHOCOLATE LAVA CAKE', price: 500, stock: 100, category: 'category dessert', image: 'img11.jpg' },
+            { id: 12, name: 'RED WINE', price: 7000, stock: 100, category: 'category drinks', image: 'img12.jpg' },
+            { id: 13, name: 'MARGARITA', price: 10000, stock: 100, category: 'category drinks', image: 'img13.jpg' },
+            { id: 14, name: 'FRESH JUICES', price: 50, stock: 100, category: 'category drinks', image: 'img14.jpg' },
+            { id: 15, name: 'BACON', price: 30, stock: 100, category: 'category addons', image: 'img15.jpg' },
+            { id: 16, name: 'FRIED EGG', price: 70, stock: 100, category: 'category addons', image: 'img16.jpg' },
+            { id: 17, name: 'SAUCES & DIPS', price: 100, stock: 100, category: 'category addons', image: 'img17.jpg' },
+        ];
+
+        let cart = [];
+
+        function displayProducts(categoryFilter) {
+            const productsDiv = document.getElementById('products');
+            productsDiv.innerHTML = '';
+            products.forEach(product => {
+                if (!categoryFilter || product.category === categoryFilter) {
+                    const productDiv = document.createElement('div');
+                    productDiv.className = 'product';
+                    productDiv.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}">
+                        <div>
+                            <h3>${product.name}</h3>
+                            <p>₱${product.price}</p>
+                            <p>Stock: <span id="stock-${product.id}">${product.stock}</span></p>
+                            <button onclick="addToCart(${product.id})">Add to Cart</button>
+                        </div>
+                    `;
+                    productsDiv.appendChild(productDiv);
+                }
+            });
+        }
+
+        function addToCart(productId) {
+            const product = products.find(item => item.id === productId);
+            if (product && product.stock > 0) {
+                const existingItem = cart.find(item => item.id === productId);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({ ...product, quantity: 1 });
+                }
+                product.stock--;
+                updateCart();
+            } else {
+                alert('Product out of stock!');
+            }
+        }
+
+        function updateCart() {
+            const cartItemsDiv = document.getElementById('cart-items');
+            cartItemsDiv.innerHTML = '';
+            let total = 0;
+            cart.forEach((item, index) => {
+                const cartItemDiv = document.createElement('div');
+                cartItemDiv.className = 'cart-item';
+                cartItemDiv.innerHTML = `
+                    <span>${item.name} x ${item.quantity}</span>
+                    <span>₱${(item.price * item.quantity).toFixed(2)}</span>
+                    <button onclick="removeFromCart(${index})">Remove</button>
+                `;
+                cartItemsDiv.appendChild(cartItemDiv);
+                total += item.price * item.quantity;
+            });
+            document.getElementById('cart-total').textContent = `Total: ₱${total.toFixed(2)}`;
+        }
+
+        function removeFromCart(index) {
+            const removedItem = cart.splice(index, 1)[0];
+            const product = products.find(item => item.id === removedItem.id);
+            product.stock += removedItem.quantity;
+            updateCart();
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty. Please add items before checking out.');
+                return;
+            }
+            const receipt = generateReceipt();
+            const receiptDiv = document.createElement('div');
+            receiptDiv.innerHTML = receipt;
+            document.body.appendChild(receiptDiv);
+            alert('Checkout successful. Thank you for your purchase!');
+            cart = [];
+            updateCart();
+            products.forEach(product => {
+                document.getElementById(`stock-${product.id}`).textContent = product.stock;
+            });
+        }
+
+        function generateReceipt() {
+            let receipt = '<h2>Receipt</h2>';
+            let total = 0;
+            cart.forEach(item => {
+                receipt += `<p>${item.name} x ${item.quantity}: ₱${(item.price * item.quantity).toFixed(2)}</p>`;
+                total += item.price * item.quantity;
+            });
+            receipt += `<p>Total: ₱${total.toFixed(2)}</p>`;
+            return receipt;
+        }
+
+        document.getElementById('checkout-btn').addEventListener('click', checkout);
+
+        document.querySelectorAll('.category-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const category = button.getAttribute('data-category');
+                displayProducts(category);
+            });
+        });
+
+        // Display all products on page load
+        displayProducts();
+    </script>
+</body>
+</html>
